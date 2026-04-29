@@ -1658,8 +1658,8 @@
         const tip = `${footName}${zihafName} | ${cl === 'ok' ? 'صحيح' : cl === 'broken' ? 'مكسور' : cl === 'missing' ? 'مفقود' : 'زيادة'} | متوقع: ${exp}`;
 
         return `<span class="foot-chip ${cl}" title="${tip}">
-          <span style="display:block; direction:ltr">${seg}</span>
-          <span style="font-size:0.72rem; letter-spacing:0.08em; opacity:0.8; margin-top:2px; font-family:monospace; direction:ltr; display:block">${exp}</span>
+          <span style="display:block; direction:ltr">${seg.split("").reverse().join("")}</span>
+          <span style="font-size:0.72rem; letter-spacing:0.08em; opacity:0.8; margin-top:2px; font-family:monospace; direction:ltr; display:block">${exp.split("").reverse().join("")}</span>
           <span style="font-size:0.65rem; opacity:0.9; margin-top:3px">${footName}</span>
         </span>`;
       }).join('');
