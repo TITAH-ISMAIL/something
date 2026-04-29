@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التحليل العروضي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;600;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      /* Light Theme (Default) */
+      --cream: #fdf7e8;
+      --parch: #f5edd6;
+      --ink: #1a1208;
+      --gold: #b8882a;
+      --gold2: #e2b96a;
+      --rust: #8b3a1a;
+      --sage: #3d5a47;
+      --shadow: rgba(26, 18, 8, 0.18);
+      --card-bg: rgba(255, 252, 244, 0.9);
+      --input-bg: rgba(253, 247, 232, 0.7);
+      --border: rgba(184, 136, 42, 0.2);
+    }
+
+    [data-theme="dark"] {
+      --cream: #0f0d0a;
+      --parch: #1a1612;
+      --ink: #e8e1d5;
+      --gold: #d4af37;
+      --gold2: #f9e29b;
+      --rust: #e06c4d;
+      --sage: #68a07d;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --card-bg: #1a1612;
+      --input-bg: #241e18;
+      --border: rgba(212, 175, 55, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Cairo', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Decorative background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(184, 136, 42, 0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(61, 90, 71, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    [data-theme="dark"] body::before {
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(212, 175, 55, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(104, 160, 125, 0.05) 0%, transparent 60%);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 1.5rem 0 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: var(--parch);
+      border: 1px solid var(--border);
+      color: var(--gold);
+      padding: 0.5rem;
+      border-radius: 50%;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    header::after {
+      content: '❧';
+      display: block;
+      color: var(--gold);
+      font-size: 1.5rem;
+      margin-top: 0.75rem;
+      opacity: 0.6;
+    }
+
+    .logo {
+      font-family: 'Amiri', serif;
+      font-size: clamp(2.2rem, 8vw, 3.8rem);
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .logo span {
+      color: var(--gold);
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--ink);
+      opacity: 0.8;
+      letter-spacing: 0.04em;
+      margin-top: 25px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      background: var(--parch);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      border: none;
+      background: transparent;
+      border-radius: 9px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--gold);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--gold);
+      color: #000;
+    }
+
+    [data-theme="dark"] .tab-btn.active {
+      color: #fff;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-family: 'Amiri', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--rust);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title::before {
+      content: '◆';
+      font-size: 0.6rem;
+      color: var(--gold);
+    }
+
+    /* Inputs */
+    .field-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 580px) {
+      .field-group {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.35rem;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--input-bg);
+      font-family: 'Amiri', serif;
+      font-size: 1.05rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      direction: rtl;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--gold2);
+      background: var(--card-bg);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 160px;
+      line-height: 2;
+      padding: 1rem 1.25rem;
+    }
+
+    #poem-input {
+      border-style: double;
+      border-width: 4px;
+      background: var(--input-bg);
+    }
+
+    select {
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 2rem;
+      background: linear-gradient(135deg, var(--gold) 0%, #d4a43a 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      padding: 0.55rem 1.2rem;
+      background: transparent;
+      border: 1.5px solid rgba(184, 136, 42, 0.4);
+      border-radius: 8px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.85rem;
+      color: var(--gold);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(184, 136, 42, 0.08);
+    }
+
+    /* Meter selector */
+    .meter-select-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .meter-select-row label {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .meter-select-row select {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    /* Results */
+    #results {
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .meter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      background: linear-gradient(135deg, var(--sage) 0%, #4a7059 100%);
+      color: #fff;
+      border-radius: 50px;
+      font-family: 'Amiri', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      box-shadow: 0 2px 10px rgba(61, 90, 71, 0.3);
+    }
+
+    .meter-badge .label {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    /* Score ring */
+    .score-ring {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .score-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: 3px solid;
+    }
+
+    .score-hi {
+      border-color: var(--sage);
+      color: var(--sage);
+      background: rgba(104, 160, 125, 0.1);
+    }
+
+    .score-mid {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    .score-lo {
+      border-color: var(--rust);
+      color: var(--rust);
+      background: rgba(224, 108, 77, 0.1);
+    }
+
+    /* Verse card */
+    .verse-block {
+      border: 1px solid rgba(184, 136, 42, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+
+    .verse-header {
+      background: rgba(184, 136, 42, 0.07);
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(184, 136, 42, 0.15);
+    }
+
+    .verse-num {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+
+    /* Pattern display */
+    .pattern-row {
+      padding: 0.9rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .shatr-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold2);
+      letter-spacing: 0.06em;
+    }
+
+    .feet-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      direction: rtl;
+    }
+
+    .foot-chip {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      border-radius: 8px;
+      padding: 2px 5px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.78rem;
+      border: 1.5px solid;
+      min-width: 50px;
+      font-weight: bold;
+    }
+
+    .foot-chip.ok {
+      border-color: rgba(61, 90, 71, 0.4);
+      background: rgba(61, 90, 71, 0.07);
+      color: var(--sage);
+    }
+
+    .foot-chip.broken {
+      border-color: rgba(184, 136, 42, 0.5);
+      background: rgba(184, 136, 42, 0.08);
+      color: #8a6010;
+    }
+
+    .foot-chip.missing {
+      border-color: rgba(139, 58, 26, 0.4);
+      background: rgba(139, 58, 26, 0.07);
+      color: var(--rust);
+    }
+
+    .foot-chip.extra_bits {
+      border-color: rgba(100, 100, 100, 0.3);
+      background: rgba(0, 0, 0, 0.04);
+      color: #666;
+    }
+
+    .foot-bits {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+      margin-top: 1px;
+      font-family: monospace;
+    }
+
+    /* Arudi text */
+    .arudi-display {
+      padding: 0.7rem 1rem;
+      background: rgba(253, 247, 232, 0.072);
+      border-top: 1px solid rgba(184, 136, 42, 0.1);
+      font-family: 'Amiri', serif;
+      font-size: 0.95rem;
+      color: #a87d2d;
+      direction: rtl;
+    }
+
+    .arudi-display span {
+      opacity: 0.6;
+      font-size: 0.78rem;
+      font-family: 'Cairo', sans-serif;
+      margin-left: 0.5rem;
+    }
+
+    .zihaf-notice {
+      padding: 0.6rem 1rem;
+      background: rgba(184, 136, 42, 0.08);
+      border-top: 1px dashed var(--border);
+      color: var(--gold);
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Binary pattern strip */
+    .pattern-strip {
+      padding: 0.5rem 1rem;
+      border-top: 1px solid rgba(184, 136, 42, 0.1);
+      display: flex;
+      gap: 2px;
+      flex-wrap: wrap;
+      direction: rtl;
+    }
+
+    .bit {
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+
+    .bit-1 {
+      background: var(--sage);
+      color: #fff;
+    }
+
+    .bit-0 {
+      background: rgba(61, 90, 71, 0.15);
+      color: var(--sage);
+    }
+
+    /* Poem textarea area */
+    .verse-input-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .verse-divider {
+      font-family: 'Amiri', serif;
+      font-size: 1.4rem;
+      color: var(--gold);
+      opacity: 0.5;
+      text-align: center;
+    }
+
+    .add-verse-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: 1.5px dashed rgba(184, 136, 42, 0.4);
+      border-radius: 8px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.85rem;
+      color: var(--gold);
+      cursor: pointer;
+      width: 100%;
+      justify-content: center;
+      transition: all 0.2s;
+      margin-bottom: 1rem;
+    }
+
+    .add-verse-btn:hover {
+      background: rgba(184, 136, 42, 0.06);
+      border-style: solid;
+    }
+
+    .remove-verse-btn {
+      background: none;
+      border: none;
+      color: var(--rust);
+      cursor: pointer;
+      font-size: 1rem;
+      opacity: 0.5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: opacity 0.2s;
+    }
+
+    .remove-verse-btn:hover {
+      opacity: 1;
+    }
+
+    /* Loading */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .loading .spinner {
+      display: block;
+    }
+
+    .loading .btn-text {
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Error */
+    .error-msg {
+      background: rgba(139, 58, 26, 0.08);
+      border: 1px solid rgba(139, 58, 26, 0.25);
+      border-radius: 10px;
+      padding: 1rem;
+      color: var(--rust);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    /* Divider */
+    .ornament {
+      text-align: center;
+      color: var(--gold);
+      opacity: 0.4;
+      font-size: 1.2rem;
+      margin: 1.5rem 0;
+      letter-spacing: 0.5rem;
+    }
+
+    /* Tooltip */
+    [data-tip] {
+      position: relative;
+      cursor: help;
+    }
+
+    [data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      right: 0;
+      background: var(--ink);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      color: #7a6540;
+      margin-top: 0.5rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header>
+      <button class="theme-toggle" onclick="toggleTheme()" title="تغيير المظهر">🌓</button>
+      <div class="logo">عَرُوضي</div>
+      <p class="subtitle">محلل العروض الشعري العربي · تحليل الأوزان والتفاعيل</p>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('single')">بيت واحد</button>
+      <button class="tab-btn" onclick="switchTab('poem')">قصيدة</button>
+    </div>
+
+    <!-- Single verse -->
+    <div id="tab-single">
+      <div class="card">
+        <div class="card-title">أدخل البيت الشعري</div>
+        <div class="field-group">
+          <div>
+            <label>الصدر</label>
+            <input type="text" id="single-sadr" placeholder="أَلَا كُلُّ شَيْءٍ مَا خَلَا اللَّهَ بَاطِلُ" />
+          </div>
+          <div>
+            <label>العجز</label>
+            <input type="text" id="single-ajuz" placeholder="وَكُلُّ نَعِيمٍ لَا مَحَالَةَ زَائِلُ" />
+          </div>
+        </div>
+        <div class="meter-select-row">
+          <label>البحر (اختياري)</label>
+          <select id="single-meter">
+            <option value="">— كشف تلقائي —</option>
+          </select>
+          <button class="btn-primary" id="single-btn" onclick="analyzeSingle()">
+            <span class="spinner"></span>
+            <span class="btn-text">تحليل ▸</span>
+          </button>
+        </div>
+      </div>
+      <div id="single-result"></div>
+    </div>
+
+    <!-- Poem -->
+    <div id="tab-poem" style="display:none">
+      <div class="card">
+        <div class="card-title">أدخل أبيات القصيدة</div>
+        <label style="margin-bottom:0.75rem;opacity:0.8">أدخل شطراً واحداً في كل سطر (الصدر ثم العجز بالترتيب)</label>
+        <textarea id="poem-input" placeholder="قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ ومَنْزِلِ
+بِسِقْطِ اللِّوَى بَيْنَ الدَّخُولِ فَحَوْمَلِ
+فَتُوْضِحَ فَالمِقْراةِ لمْ يَعْفُ رَسْمُها
+لِمَا نَسَجَتْهَا مِنْ جَنُوبٍ وَشَمْألِ"></textarea>
+        <div class="meter-select-row" style="margin-top:1.25rem">
+          <label>البحر (اختياري)</label>
+          <select id="poem-meter">
+            <option value="">— كشف تلقائي —</option>
+          </select>
+          <button class="btn-primary" id="poem-btn" onclick="analyzePoem()">
+            <span class="spinner"></span>
+            <span class="btn-text">تحليل القصيدة ▸</span>
+          </button>
+        </div>
+      </div>
+      <div id="poem-result" style="margin-top:1.5rem"></div>
+    </div>
+
+  </div>
+
+  <!-- ─── All JS inline (imports from same folder) ─────────────────── -->
+  <script type="module">
+
+    // ══════════════════════════════════════════════════════
+    //  zihaf.js (inline)
+    // ══════════════════════════════════════════════════════
+
+    const ALEF = '\u0627';
+    const NOON = '\u0646';
+    const TEH = '\u062a';
+
+    class AssertionError extends Error { }
+    function assert(c, m = 'Assertion failed') { if (!c) throw new AssertionError(m); }
+
+    function deepCopyTafeela(t) {
+      const c = Object.create(Object.getPrototypeOf(t));
+      c.name = t.name; c.allowed_zehafs = t.allowed_zehafs;
+      c.applied_ella_zehaf_class = t.applied_ella_zehaf_class;
+      c.pattern = [...t.pattern]; c.original_pattern = [...t.original_pattern];
+      c.pattern_int = t.pattern_int;
+      return c;
+    }
+
+    class BaseEllahZehaf {
+      constructor(t) { this.tafeela = deepCopyTafeela(t); this._modified = false; }
+      modifyTafeela() { }
+      get modified_tafeela() {
+        if (this._modified) return this.tafeela;
+        this.modifyTafeela();
+        this.tafeela.applied_ella_zehaf_class = this.constructor;
+        this._modified = true; return this.tafeela;
+      }
+    }
+
+    class NoZehafNorEllah extends BaseEllahZehaf {
+      get modified_tafeela() { this.tafeela.applied_ella_zehaf_class = null; return this.tafeela; }
+    }
+
+    class BaseSingleHazfZehaf extends BaseEllahZehaf {
+      modifyTafeela() {
+        const idx = this._affected_index ?? this.constructor.affected_index;
+        this.tafeela.deleteFromPattern(idx);
+      }
+      get modified_tafeela() {
+        if (this._modified) return this.tafeela;
+        this.modifyTafeela();
+        this.tafeela.applied_ella_zehaf_class = this.constructor;
+        this._modified = true; return this.tafeela;
+      }
+    }
+    class BaseSingleTaskeenZehaf extends BaseEllahZehaf {
+      modifyTafeela() {
+        const idx = this.constructor.affected_index;
+        assert(this.tafeela.pattern[idx] === 1);
+        this.tafeela.editPatternAtIndex(idx, 0);
+      }
+      get modified_tafeela() {
+        if (this._modified) return this.tafeela;
+        this.modifyTafeela();
+        this.tafeela.applied_ella_zehaf_class = this.constructor;
+        this._modified = true; return this.tafeela;
+      }
+    }
+
+    function mkHazf(idx) {
+      class Z extends BaseSingleHazfZehaf { } Z.affected_index = idx; return Z;
+    }
+    function mkTaskeen(idx) {
+      class Z extends BaseSingleTaskeenZehaf { } Z.affected_index = idx; return Z;
+    }
+
+    const Khaban = mkHazf(1); Khaban.zName = 'Khaban'; Khaban.zNameAr = 'خبن';
+    const Tay = mkHazf(3); Tay.zName = 'Tay'; Tay.zNameAr = 'طي';
+    const Waqas = mkHazf(1); Waqas.zName = 'Waqas'; Waqas.zNameAr = 'وقص';
+    const Qabadh = mkHazf(4); Qabadh.zName = 'Qabadh'; Qabadh.zNameAr = 'قبض';
+    const Kaff = mkHazf(6); Kaff.zName = 'Kaff'; Kaff.zNameAr = 'كف';
+    const Akal = mkHazf(4); Akal.zName = 'Akal'; Akal.zNameAr = 'عقل';
+    const Kasf = mkHazf(6); Kasf.zName = 'Kasf'; Kasf.zNameAr = 'كسف';
+    const Tasheeth = mkHazf(2); Tasheeth.zName = 'Tasheeth'; Tasheeth.zNameAr = 'تشعيث';
+    const Thalm = mkHazf(0); Thalm.zName = 'Thalm'; Thalm.zNameAr = 'ثلم';
+    const Edmaar = mkTaskeen(1); Edmaar.zName = 'Edmaar'; Edmaar.zNameAr = 'إضمار';
+    const Asab = mkTaskeen(4); Asab.zName = 'Asab'; Asab.zNameAr = 'عصب';
+
+    class Ziyada extends BaseEllahZehaf {
+      modifyTafeela() { this.tafeela.addToPattern(3, 1, '1'); }
+    }
+    Ziyada.zNameAr = 'زيادة';
+
+    class BaseDoubledZehaf extends BaseEllahZehaf {
+      modifyTafeela() {
+        const zs = this.constructor.zehafs;
+        const hazf = zs.filter(z => Object.getPrototypeOf(z) === BaseSingleHazfZehaf || z.prototype instanceof BaseSingleHazfZehaf);
+        const task = zs.filter(z => Object.getPrototypeOf(z) === BaseSingleTaskeenZehaf || z.prototype instanceof BaseSingleTaskeenZehaf);
+        [...hazf.map(z => z.affected_index)].sort((a, b) => b - a).forEach(i => this.tafeela.deleteFromPattern(i));
+        task.forEach(Z => { this.tafeela = new Z(this.tafeela).modified_tafeela; });
+      }
+    }
+    function mkDoubled(zs) {
+      class Z extends BaseDoubledZehaf { } Z.zehafs = zs; return Z;
+    }
+
+    const Khabal = mkDoubled([Khaban, Tay]); Khabal.zNameAr = 'خبل';
+    const Khazal = mkDoubled([Edmaar, Tay]); Khazal.zNameAr = 'خزل';
+    const Shakal = mkDoubled([Khaban, Kaff]); Shakal.zNameAr = 'شكل';
+    const Nakas = mkDoubled([Asab, Kaff]); Nakas.zNameAr = 'نقص';
+    const TayAndKasf = mkDoubled([Tay, Kasf]); TayAndKasf.zNameAr = 'طي وكسف';
+    const Tharm = mkDoubled([Thalm, Qabadh]); Tharm.zNameAr = 'ثرم';
+
+    class Hadhf extends BaseEllahZehaf {
+      modifyTafeela() {
+        const p = this.tafeela.pattern;
+        assert(p[p.length - 2] === 1 && p[p.length - 1] === 0);
+        this.tafeela.deleteFromPattern(p.length - 1);
+        this.tafeela.deleteFromPattern(this.tafeela.pattern.length - 1);
+      }
+    }
+    Hadhf.zNameAr = 'حذف';
+    class HadhfAndKhaban extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Hadhf(this.tafeela).modified_tafeela;
+        this.tafeela = new Khaban(this.tafeela).modified_tafeela;
+      }
+    }
+    HadhfAndKhaban.zNameAr = 'حذف وخبن';
+    class Qataf extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Hadhf(this.tafeela).modified_tafeela;
+        this.tafeela = new Asab(this.tafeela).modified_tafeela;
+      }
+    }
+    Qataf.zNameAr = 'قطف';
+    class Qataa extends BaseEllahZehaf {
+      modifyTafeela() {
+        const p = this.tafeela.pattern;
+        assert(p[p.length - 2] === 1 && p[p.length - 1] === 0);
+        this.tafeela.deleteFromPattern(p.length - 1);
+        this.tafeela.editPatternAtIndex(this.tafeela.pattern.length - 1, 0);
+      }
+    }
+    Qataa.zNameAr = 'قطع';
+    class Tatheel extends BaseEllahZehaf {
+      modifyTafeela() {
+        const p = this.tafeela.pattern;
+        assert(p[p.length - 3] === 1 && p[p.length - 2] === 1 && p[p.length - 1] === 0);
+        this.tafeela.addToPattern(p.length - 1, 0, ALEF);
+      }
+    }
+    Tatheel.zNameAr = 'تذييل';
+    class Tasbeegh extends BaseEllahZehaf {
+      modifyTafeela() {
+        const p = this.tafeela.pattern;
+        assert(p[p.length - 2] === 1 && p[p.length - 1] === 0);
+        this.tafeela.addToPattern(p.length - 1, 0, ALEF);
+      }
+    }
+    Tasbeegh.zNameAr = 'تسبيغ';
+    class TatheelAndEdmaar extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Tatheel(this.tafeela).modified_tafeela;
+        this.tafeela = new Edmaar(this.tafeela).modified_tafeela;
+      }
+    }
+    TatheelAndEdmaar.zNameAr = 'تذييل وإضمار';
+    class Tarfeel extends BaseEllahZehaf {
+      modifyTafeela() {
+        const l = this.tafeela.pattern.length;
+        this.tafeela.addToPattern(l, 1, TEH);
+        this.tafeela.addToPattern(this.tafeela.pattern.length, 0, NOON);
+      }
+    }
+    Tarfeel.zNameAr = 'ترفيل';
+    class TarfeelAndEdmaar extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Tarfeel(this.tafeela).modified_tafeela;
+        this.tafeela = new Edmaar(this.tafeela).modified_tafeela;
+      }
+    }
+    TarfeelAndEdmaar.zNameAr = 'ترفيل وإضمار';
+    class TarfeelAndKhaban extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Khaban(this.tafeela).modified_tafeela;
+        this.tafeela = new Tarfeel(this.tafeela).modified_tafeela;
+      }
+    }
+    TarfeelAndKhaban.zNameAr = 'ترفيل وخبن';
+    class KhabanAndQataa extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Qataa(this.tafeela).modified_tafeela;
+        this.tafeela = new Khaban(this.tafeela).modified_tafeela;
+      }
+    }
+    KhabanAndQataa.zNameAr = 'خبن وقطع';
+    class QataaAndEdmaar extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Qataa(this.tafeela).modified_tafeela;
+        this.tafeela = new Edmaar(this.tafeela).modified_tafeela;
+      }
+    }
+    QataaAndEdmaar.zNameAr = 'قطع وإضمار';
+    class Hathath extends BaseEllahZehaf {
+      modifyTafeela() {
+        const p = this.tafeela.pattern;
+        assert(p[p.length - 3] === 1 && p[p.length - 2] === 1 && p[p.length - 1] === 0);
+        for (let i = 0; i < 3; i++) this.tafeela.deleteFromPattern(this.tafeela.pattern.length - 1);
+      }
+    }
+    Hathath.zNameAr = 'حذذ';
+    class HathathAndEdmaar extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Hathath(this.tafeela).modified_tafeela;
+        this.tafeela = new Edmaar(this.tafeela).modified_tafeela;
+      }
+    }
+    HathathAndEdmaar.zNameAr = 'حذذ وإضمار';
+    class Salam extends BaseEllahZehaf {
+      modifyTafeela() {
+        const p = this.tafeela.pattern;
+        assert(p[p.length - 3] === 1 && p[p.length - 2] === 0 && p[p.length - 1] === 1);
+        for (let i = 0; i < 3; i++) this.tafeela.deleteFromPattern(this.tafeela.pattern.length - 1);
+      }
+    }
+    Salam.zNameAr = 'صلم';
+    class Waqf extends BaseEllahZehaf {
+      modifyTafeela() {
+        const p = this.tafeela.pattern;
+        assert(p[p.length - 3] === 1 && p[p.length - 2] === 0 && p[p.length - 1] === 1);
+        this.tafeela.editPatternAtIndex(p.length - 1, 0);
+      }
+    }
+    Waqf.zNameAr = 'وقف';
+    class WaqfAndTay extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Tay(this.tafeela).modified_tafeela;
+        this.tafeela = new Waqf(this.tafeela).modified_tafeela;
+      }
+    }
+    WaqfAndTay.zNameAr = 'وقف وطي';
+    class KhabalAndKasf extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Khabal(this.tafeela).modified_tafeela;
+        const k = new Kasf(this.tafeela);
+        k._affected_index = Kasf.affected_index - 2;
+        this.tafeela = k.modified_tafeela;
+      }
+    }
+    KhabalAndKasf.zNameAr = 'خبل وكسف';
+    class Qasar extends BaseEllahZehaf {
+      modifyTafeela() {
+        const p = this.tafeela.pattern;
+        assert(p[p.length - 2] === 1 && p[p.length - 1] === 0);
+        this.tafeela.deleteFromPattern(p.length - 1);
+        this.tafeela.editPatternAtIndex(this.tafeela.pattern.length - 1, 0);
+      }
+    }
+    Qasar.zNameAr = 'قصر';
+    class ThalmAndQasar extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Thalm(this.tafeela).modified_tafeela;
+        this.tafeela = new Qasar(this.tafeela).modified_tafeela;
+      }
+    }
+    ThalmAndQasar.zNameAr = 'ثلم وقصر';
+    class Aql extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Qataf(this.tafeela).modified_tafeela;
+        this.tafeela = new Khaban(this.tafeela).modified_tafeela;
+      }
+    }
+    Aql.zNameAr = 'عقل';
+    class Batr extends BaseEllahZehaf {
+      modifyTafeela() {
+        this.tafeela = new Hadhf(this.tafeela).modified_tafeela;
+        this.tafeela = new Qataa(this.tafeela).modified_tafeela;
+      }
+    }
+    Batr.zNameAr = 'بتر';
+
+    // ══════════════════════════════════════════════════════
+    //  tafeela.js (inline)
+    // ══════════════════════════════════════════════════════
+
+    class Tafeela {
+      constructor() {
+        this.name = this.constructor.name_ || '';
+        this.allowed_zehafs = this.constructor.allowed_zehafs || [];
+        this.applied_ella_zehaf_class = null;
+        this.original_pattern = String(this.constructor.pattern_int).split('').map(Number);
+        this.pattern = [...this.original_pattern];
+        this.pattern_int = this.constructor.pattern_int;
+      }
+      deleteFromPattern(i) {
+        if (i >= 0 && i < this.pattern.length) {
+          this.pattern.splice(i, 1);
+          this.pattern_int = parseInt(this.pattern.join(''), 10);
+        }
+      }
+      addToPattern(i, num) {
+        this.pattern.splice(i, 0, num);
+        this.pattern_int = parseInt(this.pattern.join(''), 10);
+      }
+      editPatternAtIndex(i, num) {
+        if (i >= 0 && i < this.pattern.length) {
+          this.pattern[i] = num;
+          this.pattern_int = parseInt(this.pattern.join(''), 10);
+        }
+      }
+      allZehafTafeela_forms() {
+        const forms = [this];
+        for (const Z of this.allowed_zehafs) {
+          try { forms.push(new Z(this).modified_tafeela); } catch (e) { if (!(e instanceof AssertionError)) throw e; }
+        }
+        return forms;
+      }
+      toString() { return this.pattern.join(''); }
+    }
+
+    function mkTafeela(name, pi, zehafs) {
+      class T extends Tafeela { } T.name_ = name; T.pattern_int = pi; T.allowed_zehafs = zehafs; return T;
+    }
+
+    const Fawlon = mkTafeela('فعولن', 11010, [Qabadh, Thalm, Tharm]);
+    const Faelon = mkTafeela('فاعلن', 10110, [Khaban, Tasheeth]);
+    const Mafaeelon = mkTafeela('مفاعيلن', 1101010, [Qabadh, Kaff]);
+    const Mustafelon = mkTafeela('مستفعلن', 1010110, [Khaban, Tay, Khabal]);
+    const Mutafaelon = mkTafeela('متفاعلن', 1110110, [Edmaar, Waqas, Khazal]);
+    const Mafaelaton = mkTafeela('مفاعلتن', 1101110, [Asab, Akal, Nakas]);
+    const Mafoolato = mkTafeela('مفعولات', 1010101, [Khaban, Tay, Khabal, Kasf]);
+    const Fae_laton = mkTafeela('فاع لاتن', 1011010, [Kaff]);
+    const Mustafe_lon = mkTafeela('مستفع لن', 1010110, [Khaban, Kaff, Tay, Shakal]);
+    const Faelaton = mkTafeela('فاعلاتن', 1011010, [Khaban, Kaff, Shakal]);
+
+    // ══════════════════════════════════════════════════════
+    //  bahr.js (inline)
+    // ══════════════════════════════════════════════════════
+
+    function cartesian(...arrs) {
+      return arrs.reduce((acc, arr) => acc.flatMap(a => arr.map(b => [...a, b])), [[]]);
+    }
+
+    class Bahr {
+      constructor() {
+        this.tafeelat = this.constructor.tafeelat || [];
+        this.arod_dharbs_map = this.constructor.arod_dharbs_map || new Map();
+        this.sub_bahrs = this.constructor.sub_bahrs || [];
+        this.only_one_shatr = this.constructor.only_one_shatr || false;
+        this.disallowed_zehafs_for_hashw = this.constructor.disallowed_zehafs_for_hashw || {};
+      }
+      get last_tafeela() { return new (this.tafeelat[this.tafeelat.length - 1])(); }
+
+      getShatrHashwCombinations(si = 0) {
+        const combos = [];
+        for (let i = 0; i < this.tafeelat.length - 1; i++) {
+          const t = new this.tafeelat[i]();
+          let forms = t.allZehafTafeela_forms();
+          const dis = this.disallowed_zehafs_for_hashw[si];
+          if (dis && i < dis.length) forms = forms.filter(f => !dis[i].includes(f.applied_ella_zehaf_class));
+          combos.push(forms);
+        }
+        return combos;
+      }
+
+      getAllowedFeetPatterns(si = 0) {
+        const res = [];
+        for (const forms of this.getShatrHashwCombinations(si)) res.push(forms.map(f => ({ pattern: f.toString(), name: f.name, zihaf: f.applied_ella_zehaf_class?.zNameAr || null })));
+        const last = [];
+        const lastPatterns = new Set();
+        const map = this.arod_dharbs_map;
+        const addFoot = (Z) => {
+          try {
+            const f = new Z(this.last_tafeela).modified_tafeela;
+            const p = f.toString();
+            if (!lastPatterns.has(p)) {
+              last.push({ pattern: p, name: f.name, zihaf: f.applied_ella_zehaf_class?.zNameAr || null });
+              lastPatterns.add(p);
+            }
+          } catch (e) { }
+        };
+
+        if (this.only_one_shatr) {
+          const items = map instanceof Set ? [...map] : [...map.keys()];
+          for (const Z of items) addFoot(Z);
+        } else {
+          if (si === 0) { for (const Z of map.keys()) addFoot(Z); }
+          else { for (const dl of map.values()) { for (const Z of dl) addFoot(Z); } }
+        }
+        res.push(last);
+        return res;
+      }
+
+      get detailed_patterns() {
+        const p = { sadr: [], ajuz: [], pairs: new Set() };
+        const getFootInfo = (t) => ({ pattern: t.toString(), name: t.name, zihaf: t.applied_ella_zehaf_class?.zNameAr || null });
+
+        if (this.only_one_shatr) {
+          const hashw = this.getShatrHashwCombinations();
+          const endings = [];
+          const items = this.arod_dharbs_map instanceof Set ? [...this.arod_dharbs_map] : [...this.arod_dharbs_map.keys()];
+          for (const Z of items) { try { endings.push(new Z(this.last_tafeela).modified_tafeela); } catch (e) { } }
+          for (const combo of cartesian(...hashw, endings)) {
+            const feet = combo.map(getFootInfo);
+            const full = feet.map(f => f.pattern).join('');
+            p.sadr.push({ pattern: full, feet, type: 'single_shatr' });
+            p.pairs.add(JSON.stringify([full, '']));
+          }
+        } else {
+          const sh = this.getShatrHashwCombinations(0);
+          const ah = this.getShatrHashwCombinations(1);
+          for (const [AZ, DZs] of this.arod_dharbs_map.entries()) {
+            let aObj; try { aObj = new AZ(this.last_tafeela).modified_tafeela; } catch (e) { continue; }
+            const aStr = aObj.toString();
+            for (const sp of cartesian(...sh, [aObj])) {
+              const sf = sp.map(getFootInfo);
+              const fullS = sf.map(f => f.pattern).join('');
+              p.sadr.push({ pattern: fullS, feet: sf, arudh_foot: aStr, arudh_class: AZ.name, arudh_zihaf: aObj.applied_ella_zehaf_class?.zNameAr || null });
+              const dObjs = [];
+              for (const DZ of DZs) { try { dObjs.push(new DZ(this.last_tafeela).modified_tafeela); } catch (e) { } }
+              if (!dObjs.length) continue;
+              for (const ap of cartesian(...ah, dObjs)) {
+                const af = ap.map(getFootInfo);
+                const fullA = af.map(f => f.pattern).join('');
+                p.ajuz.push({ pattern: fullA, feet: af, dharb_foot: af[af.length - 1].pattern, allowed_arudhs: [aStr] });
+                p.pairs.add(JSON.stringify([fullS, fullA]));
+              }
+            }
+          }
+        }
+        for (const Sub of this.sub_bahrs) {
+          const sp = new Sub().detailed_patterns;
+          p.sadr.push(...sp.sadr); p.ajuz.push(...sp.ajuz);
+          for (const x of sp.pairs) p.pairs.add(x);
+        }
+        return p;
+      }
+    }
+
+    function mkBahr(tafeelat, map, opts = {}) {
+      class B extends Bahr { }
+      B.tafeelat = tafeelat;
+      B.arod_dharbs_map = map;
+      B.only_one_shatr = opts.one || false;
+      B.sub_bahrs = opts.subs || [];
+      B.disallowed_zehafs_for_hashw = opts.dis || {};
+      return B;
+    }
+
+    const RajazManhook = mkBahr([Mustafelon, Mustafelon], new Set([NoZehafNorEllah, Khaban, Tay, Khabal, Qataa, KhabanAndQataa]), { one: true });
+    const RajazMashtoor = mkBahr([Mustafelon, Mustafelon, Mustafelon], new Set([NoZehafNorEllah, Khaban, Tay, Khabal, Qataa, KhabanAndQataa]), { one: true });
+    const RajazMajzoo = mkBahr([Mustafelon, Mustafelon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Khaban, Tay, Khabal]], [Khaban, [NoZehafNorEllah, Khaban, Tay, Khabal]], [Tay, [NoZehafNorEllah, Khaban, Tay, Khabal]], [Khabal, [NoZehafNorEllah, Khaban, Tay, Khabal]]]));
+    const RamalMajzoo = mkBahr([Faelaton, Faelaton], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Khaban, Tasbeegh, Hadhf, HadhfAndKhaban]], [Khaban, [NoZehafNorEllah, Khaban, Tasbeegh, Hadhf, HadhfAndKhaban]]]), { dis: { 0: [[Tasheeth]], 1: [[Tasheeth]] } });
+    const SareeMashtoor = mkBahr([Mustafelon, Mustafelon, Mafoolato], new Set([Waqf, Kasf]), { one: true });
+    const MunsarehManhook = mkBahr([Mustafelon, Mafoolato], new Set([Waqf, Kasf]), { one: true });
+    const KhafeefMajzoo = mkBahr([Faelaton, Mustafe_lon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, KhabanAndQataa]], [Khaban, [Khaban]]]), { dis: { 0: [[Kaff, Shakal, Tasheeth]], 1: [[Kaff, Shakal, Tasheeth]] } });
+    const MutakarebMajzoo = mkBahr([Fawlon, Fawlon, Fawlon], new Map([[Hadhf, [Hadhf, Batr]]]), { dis: { 0: [[], [Thalm, Tharm]], 1: [[Thalm, Tharm], [Thalm, Tharm]] } });
+    const MutadarakMashtoor = mkBahr([Faelon, Faelon, Faelon], new Set([NoZehafNorEllah, Khaban, Tasheeth, Tatheel, TarfeelAndKhaban]), { one: true });
+    const MutadarakMajzoo = mkBahr([Faelon, Faelon, Faelon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Khaban, Tasheeth, Tatheel, TarfeelAndKhaban]], [Khaban, [NoZehafNorEllah, Khaban, Tasheeth, Tatheel, TarfeelAndKhaban]], [Tasheeth, [NoZehafNorEllah, Khaban, Tasheeth, Tatheel, TarfeelAndKhaban]]]));
+    const BaseetMajzoo = mkBahr([Mustafelon, Faelon, Mustafelon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Tatheel, Qataa]], [Qataa, [NoZehafNorEllah]]]), { dis: { 0: [[], [Tasheeth]], 1: [[], [Tasheeth]] } });
+    const BaseetMukhalla = mkBahr([Mustafelon, Faelon, Mustafelon], new Map([[KhabanAndQataa, [KhabanAndQataa]]]), { dis: { 0: [[], [Tasheeth]], 1: [[], [Tasheeth]] } });
+    const WaferMajzoo = mkBahr([Mafaelaton, Mafaelaton], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Asab]], [Asab, [NoZehafNorEllah, Asab]]]));
+    const KamelMajzoo = mkBahr([Mutafaelon, Mutafaelon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Edmaar, Qataa, QataaAndEdmaar, Tatheel, TatheelAndEdmaar, Tarfeel, TarfeelAndEdmaar]], [Edmaar, [NoZehafNorEllah, Edmaar, Qataa, QataaAndEdmaar, Tatheel, TatheelAndEdmaar, Tarfeel, TarfeelAndEdmaar]]]));
+
+    const Taweel = mkBahr([Fawlon, Mafaeelon, Fawlon, Mafaeelon], new Map([[Qabadh, [Qabadh, Hadhf, NoZehafNorEllah]]]), { dis: { 0: [[], [], [Thalm, Tharm]], 1: [[Thalm, Tharm], [], [Thalm, Tharm]] } });
+    const Madeed = mkBahr([Faelaton, Faelon, Faelaton], new Map([[NoZehafNorEllah, [NoZehafNorEllah]], [Hadhf, [Hadhf, Batr]], [HadhfAndKhaban, [HadhfAndKhaban]], [Batr, [Batr]]]), { dis: { 0: [[Shakal, Tasheeth], [Tasheeth]], 1: [[Shakal, Tasheeth], [Tasheeth]] } });
+    const Baseet = mkBahr([Mustafelon, Faelon, Mustafelon, Faelon], new Map([[Khaban, [Khaban, Qataa]]]), { subs: [BaseetMajzoo, BaseetMukhalla], dis: { 0: [[], [Tasheeth], []], 1: [[], [Tasheeth], []] } });
+    const Wafer = mkBahr([Mafaelaton, Mafaelaton, Mafaelaton], new Map([[Qataf, [Qataf, Aql]]]), { subs: [WaferMajzoo] });
+    const Kamel = mkBahr([Mutafaelon, Mutafaelon, Mutafaelon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Edmaar, Qataa, QataaAndEdmaar, HathathAndEdmaar]], [Edmaar, [NoZehafNorEllah, Edmaar, Qataa, QataaAndEdmaar, HathathAndEdmaar]], [Hathath, [Hathath, HathathAndEdmaar]]]), { subs: [KamelMajzoo] });
+    const Hazaj = mkBahr([Mafaeelon, Mafaeelon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Hadhf]], [Kaff, [NoZehafNorEllah, Hadhf]]]), { dis: { 0: [[Qabadh]], 1: [[Qabadh]] } });
+    const Rajaz = mkBahr([Mustafelon, Mustafelon, Mustafelon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Khaban, Tay, Khabal, Qataa, KhabanAndQataa]], [Khaban, [NoZehafNorEllah, Khaban, Tay, Khabal, Qataa, KhabanAndQataa]], [Tay, [NoZehafNorEllah, Khaban, Tay, Khabal, Qataa, KhabanAndQataa]], [Khabal, [NoZehafNorEllah, Khaban, Tay, Khabal, Qataa, KhabanAndQataa]]]), { subs: [RajazMajzoo, RajazMashtoor, RajazManhook] });
+    const Ramal = mkBahr([Faelaton, Faelaton, Faelaton], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Khaban, Hadhf, HadhfAndKhaban, Qataa, KhabanAndQataa]], [Hadhf, [NoZehafNorEllah, Khaban, Hadhf, HadhfAndKhaban, Qasar, KhabanAndQataa]], [HadhfAndKhaban, [NoZehafNorEllah, Khaban, Hadhf, HadhfAndKhaban, Qataa, KhabanAndQataa]]]), { subs: [RamalMajzoo], dis: { 0: [[Tasheeth], [Tasheeth]], 1: [[Tasheeth], [Tasheeth]] } });
+    const Saree = mkBahr([Mustafelon, Mustafelon, Mafoolato], new Map([[TayAndKasf, [TayAndKasf, Salam, WaqfAndTay]], [KhabalAndKasf, [KhabalAndKasf, Salam]]]), { subs: [SareeMashtoor] });
+    const Munsareh = mkBahr([Mustafelon, Mafoolato, Mustafelon], new Map([[Tay, [Tay, Qataa]]]), { subs: [MunsarehManhook] });
+    const Khafeef = mkBahr([Faelaton, Mustafe_lon, Faelaton], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Khaban, Tasheeth, Hadhf, HadhfAndKhaban]], [Khaban, [NoZehafNorEllah, Khaban, Tasheeth, Hadhf, HadhfAndKhaban]], [Hadhf, [NoZehafNorEllah, Khaban, Tasheeth, Hadhf, HadhfAndKhaban]]]), { subs: [KhafeefMajzoo], dis: { 0: [[Kaff, Shakal], []], 1: [[Kaff, Shakal], []] } });
+    const Mudhare = mkBahr([Mafaeelon, Fae_laton], new Map([[NoZehafNorEllah, [NoZehafNorEllah]]]));
+    const Muqtadheb = mkBahr([Mafoolato, Mustafelon], new Map([[Tay, [Tay]], [Khabal, [Tay]]]), { dis: { 0: [[]], 1: [[]] } });
+    const Mujtath = mkBahr([Mustafe_lon, Faelaton], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Khaban, Tasheeth]], [Khaban, [NoZehafNorEllah, Khaban, Tasheeth]]]), { dis: { 0: [[Kaff]], 1: [[Kaff]] } });
+    const Mutakareb = mkBahr([Fawlon, Fawlon, Fawlon, Fawlon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Hadhf, Qataa, Batr, Qasar, ThalmAndQasar]], [Qabadh, [NoZehafNorEllah, Hadhf, Qataa, Batr, Qasar, ThalmAndQasar]], [Hadhf, [NoZehafNorEllah, Hadhf, Qataa, Batr, Qasar, ThalmAndQasar]]]), { subs: [MutakarebMajzoo], dis: { 0: [[], [Thalm, Tharm], [Thalm, Tharm]], 1: [[Thalm, Tharm], [Thalm, Tharm], [Thalm, Tharm]] } });
+    const Mutadarak = mkBahr([Faelon, Faelon, Faelon, Faelon], new Map([[NoZehafNorEllah, [NoZehafNorEllah, Khaban, Tasheeth]], [Khaban, [NoZehafNorEllah, Khaban, Tasheeth]], [Tasheeth, [NoZehafNorEllah, Khaban, Tasheeth]]]), { subs: [MutadarakMajzoo, MutadarakMashtoor] });
+
+    const METER_CLASSES = {
+      'الطويل': Taweel, 'المديد': Madeed, 'البسيط': Baseet,
+      'الوافر': Wafer, 'الكامل': Kamel, 'الهزج': Hazaj,
+      'الرجز': Rajaz, 'الرمل': Ramal, 'السريع': Saree,
+      'المنسرح': Munsareh, 'الخفيف': Khafeef, 'المضارع': Mudhare,
+      'المقتضب': Muqtadheb, 'المجتث': Mujtath, 'المتقارب': Mutakareb,
+      'المتدارك': Mutadarak
+    };
+    const METER_KEYS = Object.keys(METER_CLASSES);
+
+    // ══════════════════════════════════════════════════════
+    //  arudi.js (inline)
+    // ══════════════════════════════════════════════════════
+
+    const ALEF_C = '\u0627';
+    const ALEF_MADDA_C = '\u0622';
+    const ALEF_MAKSURA = '\u0649';
+    const DAMMA = '\u064f';
+    const DAMMATAN = '\u064c';
+    const FATHA = '\u064e';
+    const FATHATAN = '\u064b';
+    const KASRA = '\u0650';
+    const KASRATAN = '\u064d';
+    const SHADDA = '\u0651';
+    const SUKUN = '\u0652';
+    const WAW = '\u0648';
+    const YEH = '\u064a';
+    const ARABIC_LETTERS = 'ءآأؤإئابةتثجحخدذرزسشصضطظعغفقكلمنهوىي';
+
+    function stripTashkeel(t) { return t.replace(/[\u064b-\u065f\u0670]/g, ''); }
+
+    class ArudiConverter {
+      constructor() {
+        this.harakat = [KASRA, FATHA, DAMMA];
+        this.sukun = [SUKUN];
+        this.mostly_saken = [ALEF_C, WAW, ALEF_MAKSURA, YEH];
+        this.tnween_chars = [DAMMATAN, KASRATAN, FATHATAN];
+        this.shadda_chars = [SHADDA];
+        this.all_chars = [...ARABIC_LETTERS, ' '];
+        this.prem_chars = new Set([...this.harakat, ...this.sukun, ...this.mostly_saken, ...this.tnween_chars, ...this.shadda_chars, ...this.all_chars]);
+        this.CHANGE_LST = { 'هذا': 'هَاذَا', 'هذه': 'هَاذِه', 'هذان': 'هَاذَان', 'هذين': 'هَاذَين', 'هؤلاء': 'هَاؤُلَاء', 'ذلك': 'ذَالِك', 'ذلكما': 'ذَالِكُمَا', 'ذلكم': 'ذَالِكُم', 'أولئك': 'أُلَائِك', 'أولئكم': 'أُلَائِكُم', 'الله': 'اللَّاه', 'اللهم': 'اللَّاهُمّ', 'إله': 'إِلَاه', 'الإله': 'الإِلَاه', 'إلهي': 'إِلَاهي', 'إلهنا': 'إِلَاهنا', 'إلهكم': 'إِلَاهكم', 'إلههم': 'إِلَاههم', 'إلههن': 'إِلَاههن', 'رحمن': 'رَحمَان', 'الرحمن': 'الرَّحمَان', 'طاوس': 'طَاوُوس', 'داود': 'دَاوُود', 'لكن': 'لَاكِن', 'لكنّ': 'لَاكِنّ', 'لكنه': 'لَاكِنّهُ', 'طه': 'طَاهَ' + FATHA, 'لله': 'لِللَاهِ', 'آه': 'أَاهِ', 'هو': 'هْوَ', 'هي': 'هْيَ' };
+      }
+      _normalizeShadda(t) {
+        const h = [...this.harakat, ...this.tnween_chars].join('');
+        return t.replace(new RegExp(`([${h}])([${SHADDA}])`, 'g'), '$2$1');
+      }
+      _normalizeOrthography(t) {
+        t = t.replace(/\u0670/g, ALEF_C);
+        t = t.replace(new RegExp(`${ALEF_C}[${FATHA}${DAMMA}${KASRA}]`, 'g'), ALEF_C);
+        t = t.replace(new RegExp(`${ALEF_C}${FATHATAN}`, 'g'), `${FATHATAN}${ALEF_C}`);
+        return t;
+      }
+      _normalizeLigatures(t) {
+        const hp = `[${[...this.harakat, ...this.tnween_chars].join('')}]`;
+        const d = (l, ch) => m => 'ل' + (m.length > l.length ? m.slice(l.length) : '') + ch;
+        t = t.replace(new RegExp(`ﻻ(${hp})?`, 'g'), d('ﻻ', 'ا'));
+        t = t.replace(new RegExp(`ﻷ(${hp})?`, 'g'), d('ﻷ', 'أ'));
+        t = t.replace(new RegExp(`ﻹ(${hp})?`, 'g'), d('ﻹ', 'إ'));
+        t = t.replace(new RegExp(`ﻵ(${hp})?`, 'g'), d('ﻵ', 'آ'));
+        return t;
+      }
+      _resolveWasl(t) {
+        t = t.replace(/([^\s]\S*)([اىيو])\s+ا/g, '$1');
+        t = t.replace(/\s+ا/g, '');
+        const pr = '\u0641\u0648\u0628\u062a\u0643', h = this.harakat.join('');
+        t = t.replace(new RegExp(`([${pr}])([${h}]?)ا(لل)`, 'g'), '$1$2$3');
+        return t;
+      }
+      _handleSpace(p) {
+        if (!p) return p;
+        return p[p.length - 1] === ' ' ? p.slice(0, -2) : p;
+      }
+      _removeExtraHarakat(t) {
+        let o = ''; const cs = [...t];
+        for (let i = 0; i < cs.length; i++) {
+          if (i < cs.length - 1 && this.harakat.includes(cs[i]) && this.harakat.includes(cs[i + 1])) { i++; continue; }
+          o += cs[i];
+        }
+        return o;
+      }
+      _processSpecialsBefore(bait) {
+        if (bait && bait[0] === 'ا') bait = 'أَ' + bait.slice(1);
+        bait = bait.replace(/(^|\s)([فوبتك])([\u064e\u064f\u0650])?ال/g, '$1$2$3 ال');
+        const sun = 'تثدذرزسشصضطظلن';
+        bait = bait.replace(new RegExp(` ال([${sun}])`, 'g'), ' ا$1');
+        bait = bait.replace(/وا /g, 'و ');
+        if (bait.endsWith('وا')) bait = bait.slice(0, -1);
+        bait = bait.replace(/وْا/g, 'و');
+        if (bait.endsWith('وْا')) bait = bait.slice(0, -2) + 'و';
+        bait = bait.replace(/الله/g, 'اللاه').replace(/اللّه/g, 'الله').replace(/إلَّا/g, 'إِلّا')
+          .replace(/نْ ال/g, 'نَ ال').replace(/لْ ال/g, 'لِ ال').replace(/إلَى/g, 'إِلَى')
+          .replace(/إذَا/g, 'إِذَا').replace(/ك /g, 'كَ ').replace(/ ال /g, ' الْ ')
+          .replace(/ْ ال/g, 'ِ ال').replace(/عَمْرٍو/g, 'عَمْرٍ').replace(/عَمْرُو/g, 'عَمْرُ');
+        const rm = new RegExp(`[${[...this.harakat, ...this.sukun, ...this.tnween_chars].join('')}]`, 'g');
+        const vp = ['و', 'ف', 'ك', 'ب', 'ل', 'وب', 'فك', 'ول', 'فل'];
+        const ph = { 'و': 'وَ', 'ف': 'فَ', 'ك': 'كَ', 'ب': 'بِ', 'ل': 'لِ' };
+        const out = [];
+        for (const word of bait.split(' ')) {
+          const cws = word.replace(rm, ''), cp = stripTashkeel(word);
+          let found = false;
+          for (const c of [cws, cp]) { if (c in this.CHANGE_LST) { out.push(this.CHANGE_LST[c]); found = true; break; } }
+          if (!found) {
+            outer:
+            for (const c of [cws, cp]) {
+              for (const [k, r] of Object.entries(this.CHANGE_LST)) {
+                if (c.endsWith(k)) { const px = c.slice(0, -k.length); if (vp.includes(px)) { let np = ''; for (const ch of [...px]) np += ph[ch] || ch; out.push(np + r); found = true; break outer; } }
+              }
+            }
+          }
+          if (!found) out.push(word);
+        }
+        bait = out.join(' ');
+        if (bait.length > 1 && this.all_chars.includes(bait[1])) bait = bait[0] + this.harakat[1] + bait.slice(1);
+        const fc = []; const bc = [...bait]; let i = 0;
+        while (i < bc.length) {
+          if (bc[i] === 'ا' && i > 0 && this.tnween_chars.includes(bc[i - 1])) {
+            i++;
+            if (i < bc.length && [...this.harakat, ...this.sukun, ...this.tnween_chars, ...this.shadda_chars].includes(bc[i])) i++;
+            continue;
+          }
+          fc.push(bc[i]); i++;
+        }
+        return fc.join('');
+      }
+      _processSpecialsAfter(b) { return b.replace(/ةن/g, 'تن'); }
+      _extractPattern(text, saturate = true, muqayyad = false) {
+        text = this._removeExtraHarakat(text);
+        let chars = [...text.replace(new RegExp(ALEF_MADDA_C, 'g'), 'ءَا').trim()];
+        chars = chars.filter(c => this.prem_chars.has(c));
+        chars = [...[...chars].join('').replace(/ +/g, ' ').trim()];
+        let op = '', pc = '', i = 0;
+        while (i < chars.length - 1) {
+          const ch = chars[i]; let nc = chars[i + 1];
+          if (this.all_chars.includes(ch)) {
+            if (ch === ' ') { pc += ch; i++; continue; }
+            if (nc === ' ' && i + 2 < chars.length) nc = chars[i + 2];
+            let nnc = null; if (i < chars.length - 2) nnc = chars[i + 2];
+            const pd = op.length > 0 ? op[op.length - 1] : '';
+            if (this.harakat.includes(nc)) {
+              const il = i + 2 >= chars.length;
+              if (muqayyad && il) { op += '0'; pc += ch; } else { op += '1'; pc += ch; }
+            } else if (this.sukun.includes(nc)) {
+              if (pd !== '0') { op += '0'; pc += ch; }
+              else if (i + 1 === chars.length - 1) { op += '0'; pc += ch; }
+              else { pc = this._handleSpace(pc) + ch; }
+            } else if (this.tnween_chars.includes(nc)) {
+              if (ch !== 'ا') pc += ch; pc += 'ن'; op += '10';
+              if (i + 2 < chars.length && chars[i + 2] === 'ا') i++;
+            } else if (this.shadda_chars.includes(nc)) {
+              if (pd !== '0') { pc += ch + ch; op += '01'; } else { pc = this._handleSpace(pc) + ch + ch; op += '1'; }
+              if (i + 2 < chars.length) {
+                if (this.harakat.includes(chars[i + 2])) {
+                  const isl = i + 3 >= chars.length;
+                  if (muqayyad && isl) { op = op.slice(0, -1) + '0'; i++; } else { i++; }
+                } else if (this.tnween_chars.includes(chars[i + 2])) { i++; pc += 'ن'; op += '0'; if (i + 2 < chars.length && chars[i + 2] === 'ا') i++; }
+              }
+            } else if ([ALEF_C, ALEF_MAKSURA].includes(nc)) { op += '10'; pc += ch + nc; }
+            else if (this.all_chars.includes(nc)) {
+              if (pd !== '0') { op += '0'; pc += ch; }
+              else if (pd === '0' && i + 1 < chars.length && chars[i + 1] === ' ') { op += '1'; pc += ch; }
+              else { pc = this._handleSpace(pc) + ch; op += '0'; }
+              i--;
+            }
+            if (!muqayyad && nnc === ' ' && pd !== '0' && ch === 'ه') {
+              if (nc === this.harakat[0]) { pc += 'ي'; op += '0'; }
+              if (nc === this.harakat[2]) { pc += 'و'; op += '0'; }
+            }
+            i += 2;
+          } else if (ch === 'ا') { op += '0'; pc += ch; i++; }
+          else { i++; }
+        }
+        if (!muqayyad && saturate && op && op[op.length - 1] !== '0') op += '0';
+        if (!muqayyad && saturate && chars.length) {
+          const lc = chars[chars.length - 1];
+          if (lc === this.harakat[0]) pc += 'ي';
+          else if (lc === this.tnween_chars[1]) pc = pc.slice(0, -1) + 'ي';
+          else if (lc === this.harakat[1]) pc += 'ا';
+          else if (lc === this.harakat[2]) pc += 'و';
+          else if (lc === this.tnween_chars[0]) pc = pc.slice(0, -1) + 'و';
+          else if (this.mostly_saken.includes(lc) && chars.length > 1 && !this.tnween_chars.includes(chars[chars.length - 2])) pc += lc;
+        }
+        return [pc, op];
+      }
+      prepareText(text, saturate = true, muqayyad = false) {
+        text = text.trim(); if (!text) return ['', ''];
+        text = this._normalizeOrthography(text);
+        text = this._normalizeLigatures(text);
+        text = this._normalizeShadda(text);
+        let pre = this._processSpecialsBefore(text);
+        pre = this._resolveWasl(pre);
+        let [as, pat] = this._extractPattern(pre, saturate, muqayyad);
+        as = this._processSpecialsAfter(as);
+        return [as, pat];
+      }
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  processor.js (inline)
+    // ══════════════════════════════════════════════════════
+
+    function seqRatio(a, b) {
+      if (!a.length && !b.length) return 1;
+      if (!a.length || !b.length) return 0;
+      const m = a.length, n = b.length;
+      const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+      for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+        dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+      return (2 * dp[m][n]) / (m + n);
+    }
+
+    class ArudhProcessor {
+      constructor() {
+        this.converter = new ArudiConverter();
+        this.meter_classes = METER_CLASSES;
+        this.precomputed_patterns = {};
+        this._precompute();
+      }
+      _precompute() {
+        for (const [n, C] of Object.entries(this.meter_classes))
+          this.precomputed_patterns[n] = new C().detailed_patterns;
+      }
+      _sim(a, b) { return Math.pow(seqRatio(a, b), 6); }
+
+      processPoem(verses, meterName = null) {
+        const counts = {}, tmp = [];
+        for (let i = 0; i < verses.length; i++) {
+          const [sadr, ajuz] = verses[i];
+          const ss = this.converter.prepareText(sadr, true, false);
+          const su = this.converter.prepareText(sadr, false, false);
+          let as = this.converter.prepareText(ajuz, true, false);
+          let au = this.converter.prepareText(ajuz, false, true);
+          if (!ajuz) { as = ['', '']; au = ['', '']; }
+          const sc = [ss]; if (su[1] !== ss[1]) sc.push(su);
+          const ac = [as]; if (au[1] !== as[1]) ac.push(au);
+          const cands = this._findBest(sc, ac, meterName);
+          let mi = null;
+          if (cands.length) { mi = cands[0]; counts[mi.meter] = (counts[mi.meter] || 0) + 1; }
+          let cs = sc[0], ca = ac[0];
+          if (mi) {
+            if (mi.sadr_input_pattern) for (const c of sc) if (c[1] === mi.sadr_input_pattern) { cs = c; break; }
+            if (mi.ajuz_input_pattern) for (const c of ac) if (c[1] === mi.ajuz_input_pattern) { ca = c; break; }
+          }
+          tmp.push({ index: i, sadr: { text: sadr, pattern: cs[1], arudi: cs[0] }, ajuz: { text: ajuz, pattern: ca[1], arudi: ca[0] }, match: mi });
+        }
+        let gm;
+        if (meterName) gm = meterName;
+        else if (Object.keys(counts).length) gm = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+        else return { error: 'لم يتم التعرف على البحر' };
+        return { meter: gm, verses: tmp.map(r => this._analyzeVerse(r, gm)) };
+      }
+
+      _findBest(sc, ac, tm = null) {
+        const PRI = { rajaz: 20, kamel: 10, hazaj: 20, wafer: 10, saree: 20, munsareh: 10, baseet: 10, ramal: 15, mutadarak: 15, mutakareb: 15 };
+        // map Arabic names to priority keys
+        const AMAP = { 'الطويل': 'taweel', 'المديد': 'madeed', 'البسيط': 'baseet', 'الوافر': 'wafer', 'الكامل': 'kamel', 'الهزج': 'hazaj', 'الرجز': 'rajaz', 'الرمل': 'ramal', 'السريع': 'saree', 'المنسرح': 'munsareh', 'الخفيف': 'khafeef', 'المضارع': 'mudhare', 'المقتضب': 'muqtadheb', 'المجتث': 'mujtath', 'المتقارب': 'mutakareb', 'المتدارك': 'mutadarak' };
+        let entries = Object.entries(this.precomputed_patterns);
+        if (tm) { if (!(tm in this.precomputed_patterns)) return []; entries = [[tm, this.precomputed_patterns[tm]]]; }
+        const res = [];
+        for (const [name, pats] of entries) {
+          let bs = null, bss = -1, bsi = '';
+          for (const c of sc) { const m = this._bestComp(c[1], pats.sadr); if (m.score > bss) { bss = m.score; bs = m; bsi = c[1]; } }
+          let ba = null, bas = -1, bai = '';
+          const ha = ac.some(c => c[1]);
+          if (ha) { for (const c of ac) { if (!c[1]) continue; const m = this._bestComp(c[1], pats.ajuz); if (m.score > bas) { bas = m.score; ba = m; bai = c[1]; } } }
+          let vp = false;
+          if (bs?.ref && (!ha || (ba?.ref))) {
+            const k = JSON.stringify([bs.ref.pattern, ba?.ref?.pattern ?? '']);
+            if (pats.pairs.has(k)) vp = true;
+          }
+          const tot = ha ? (bss + bas) / 2 : bss;
+          const pk = AMAP[name] || name;
+          res.push({ meter: name, score: tot, sadr_match: bs, ajuz_match: ba, valid_pair: vp, sadr_input_pattern: bsi, ajuz_input_pattern: bai, _pk: pk });
+        }
+        res.sort((a, b) => {
+          const sd = Math.round(b.score * 1000) - Math.round(a.score * 1000);
+          if (sd !== 0) return sd;
+          if (b.valid_pair !== a.valid_pair) return b.valid_pair ? 1 : -1;
+          return (PRI[b._pk] || 0) - (PRI[a._pk] || 0);
+        });
+        return res;
+      }
+
+      _bestComp(ip, comps) {
+        let bs = -1, br = null;
+        for (const item of comps) { const s = this._sim(item.pattern, ip); if (s > bs) { bs = s; br = item; } }
+        return { score: bs, ref: br };
+      }
+
+      _analyzeVerse(res, mn) {
+        const pats = this.precomputed_patterns[mn];
+        if (!pats) return { error: 'بيانات البحر غير موجودة' };
+        const sm = this._bestComp(res.sadr.pattern, pats.sadr);
+        let am = null;
+        if (res.ajuz.pattern) am = this._bestComp(res.ajuz.pattern, pats.ajuz);
+        const C = this.meter_classes[mn];
+        let as = [], aa = [];
+        if (C) { const inst = new C(); as = inst.getAllowedFeetPatterns(0); aa = inst.getAllowedFeetPatterns(1); }
+        const sa = this._analyzeFeet(res.sadr.pattern, as, sm.ref);
+        const aja = res.ajuz.pattern ? this._analyzeFeet(res.ajuz.pattern, aa, am?.ref) : null;
+        const sc = am ? 2 : 1, ss = sm.score + (am?.score ?? 0);
+        return { verse_index: res.index, sadr_text: res.sadr.text, ajuz_text: res.ajuz.text, sadr_arudi: res.sadr.arudi, ajuz_arudi: res.ajuz.arudi, input_pattern: res.sadr.pattern + res.ajuz.pattern, best_ref_pattern: (sm.ref?.pattern ?? '') + (am?.ref?.pattern ?? ''), score: Math.round(ss / sc * 100) / 100, sadr_analysis: sa, ajuz_analysis: aja };
+      }
+
+      _analyzeFeet(ip, afl, br) {
+        const analysis = []; let ci = 0;
+        const rfb = br?.feet ?? [];
+        const nf = afl?.length || rfb.length;
+        for (let i = 0; i < nf; i++) {
+          let cands = afl?.[i] ?? (i < rfb.length ? [rfb[i]] : []);
+          cands = [...cands].sort((a, b) => b.pattern.length - a.pattern.length);
+          let blm = null, bls = -1;
+          for (const c of cands) {
+            const seg = ip.slice(ci, ci + c.pattern.length);
+            if (!seg) break;
+            const s = this._sim(c.pattern, seg);
+            if (seg.length === c.pattern.length && s === 1) { blm = c; bls = 1; break; }
+            if (s > bls) { bls = s; blm = c; }
+          }
+          if (!blm && cands.length) blm = cands[0];
+          if (!blm) { analysis.push({ foot_index: i, expected_pattern: cands[0]?.pattern ?? '?', name: cands[0]?.name ?? '؟', zihaf: null, actual_segment: 'MISSING', score: 0, status: 'missing' }); continue; }
+          const ei = Math.min(ci + blm.pattern.length, ip.length);
+          const seg = ip.slice(ci, ei);
+          const fs = this._sim(blm.pattern, seg);
+          const st = !seg ? 'missing' : fs === 1 ? 'ok' : 'broken';
+          analysis.push({
+            foot_index: i,
+            expected_pattern: blm.pattern,
+            name: blm.name,
+            zihaf: blm.zihaf,
+            actual_segment: seg,
+            score: Math.round(fs * 100) / 100,
+            status: st
+          });
+          ci = ei;
+        }
+        if (ci < ip.length) analysis.push({ foot_index: nf, expected_pattern: '', name: 'زيادة', zihaf: null, actual_segment: ip.slice(ci), score: 0, status: 'extra_bits' });
+        return analysis;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  UI Logic
+    // ══════════════════════════════════════════════════════
+
+    let processor;
+    try {
+      processor = new ArudhProcessor();
+      console.log('ArudhProcessor initialized ✓');
+    } catch (e) {
+      console.error('Init error:', e);
+    }
+
+    // Populate selects
+    const METER_AR = Object.keys(METER_CLASSES);
+    ['single-meter', 'poem-meter'].forEach(id => {
+      const sel = document.getElementById(id);
+      METER_AR.forEach(name => {
+        const o = document.createElement('option');
+        o.value = name; o.textContent = name;
+        sel.appendChild(o);
+      });
+    });
+
+    // Tab switching
+    window.switchTab = function (tab) {
+      document.getElementById('tab-single').style.display = tab === 'single' ? '' : 'none';
+      document.getElementById('tab-poem').style.display = tab === 'poem' ? '' : 'none';
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (tab === 'single' && i === 0) || (tab === 'poem' && i === 1)));
+    };
+
+    // (Dynamic verse rows removed in favor of single textarea)
+
+    function setLoading(btnId, on) {
+      const btn = document.getElementById(btnId);
+      btn.disabled = on;
+      btn.classList.toggle('loading', on);
+    }
+
+    // ── Score display helper ──
+    function scoreClass(s) {
+      if (s >= 0.8) return 'score-hi';
+      if (s >= 0.5) return 'score-mid';
+      return 'score-lo';
+    }
+    function pct(s) { return Math.round(s * 100) + '%'; }
+
+    // ── Render feet analysis ──
+    function renderFeet(analysis, label) {
+      if (!analysis || !analysis.length) return '';
+      const chips = analysis.map(f => {
+        const cl = f.status === 'ok' ? 'ok' : f.status === 'broken' ? 'broken' : f.status === 'missing' ? 'missing' : 'extra_bits';
+        const seg = f.actual_segment || '—';
+        const exp = f.expected_pattern;
+        const footName = f.name || '؟';
+        const zihafName = f.zihaf ? ` (دخل عليه ${f.zihaf})` : '';
+        const tip = `${footName}${zihafName} | ${cl === 'ok' ? 'صحيح' : cl === 'broken' ? 'مكسور' : cl === 'missing' ? 'مفقود' : 'زيادة'} | متوقع: ${exp}`;
+
+        return `<span class="foot-chip ${cl}" title="${tip}">
+          <span style="display:block; direction:ltr">${seg}</span>
+          <span style="font-size:0.72rem; letter-spacing:0.08em; opacity:0.8; margin-top:2px; font-family:monospace; direction:ltr; display:block">${exp}</span>
+          <span style="font-size:0.65rem; opacity:0.9; margin-top:3px">${footName}</span>
+        </span>`;
+      }).join('');
+      return `<div class="pattern-row">
+        <div class="shatr-label">${label}</div>
+        <div class="feet-row">${chips}</div>
+      </div>`;
+    }
+
+    // ── Render binary strip ──
+    function renderStrip(pattern) {
+      if (!pattern) return '';
+      const bits = [...pattern].map(b => `<span class="bit bit-${b}">${b}</span>`).join('');
+      return `<div class="pattern-strip">${bits}</div>`;
+    }
+
+    // ── Render one verse result ──
+    function renderVerse(v, idx) {
+      const sc = scoreClass(v.score);
+      const sadrFeet = renderFeet(v.sadr_analysis, 'الصدر');
+      const ajuzFeet = v.ajuz_analysis ? renderFeet(v.ajuz_analysis, 'العجز') : '';
+      const strip = renderStrip(v.input_pattern);
+      const sadrArudi = v.sadr_arudi ? `<div class="arudi-display"><span>الصدر العروضي:</span>${v.sadr_arudi}</div>` : '';
+      const ajuzArudi = v.ajuz_arudi ? `<div class="arudi-display"><span>العجز العروضي:</span>${v.ajuz_arudi}</div>` : '';
+
+      const zihafat = [];
+      const seen = new Set();
+      [...v.sadr_analysis, ...(v.ajuz_analysis || [])].forEach(f => {
+        if (f.zihaf) {
+          const key = `${f.zihaf}-${f.name}`;
+          if (!seen.has(key)) {
+            zihafat.push({ foot: f.name, zihaf: f.zihaf });
+            seen.add(key);
+          }
+        }
+      });
+
+      let zihafNotice = '';
+      if (zihafat.length > 0) {
+        const list = zihafat.map(z => `دخل <b>${z.zihaf}</b> على تفعيلة <b>${z.foot}</b>`).join('، ');
+        zihafNotice = `<div class="zihaf-notice">ℹ️ ${list}</div>`;
+      } else if ([...v.sadr_analysis, ...(v.ajuz_analysis || [])].some(f => f.status === 'broken')) {
+        zihafNotice = `<div class="zihaf-notice">⚠️ تم دخول زحاف أو علة في هذا البيت</div>`;
+      }
+
+      return `<div class="verse-block">
+        <div class="verse-header">
+          <span class="verse-num">البيت ${idx + 1}</span>
+          <span class="score-circle ${sc}" style="width:38px;height:38px;font-size:0.72rem;border-width:2px">${pct(v.score)}</span>
+        </div>
+        ${sadrFeet}
+        ${ajuzFeet}
+        ${sadrArudi}
+        ${ajuzArudi}
+        ${zihafNotice}
+        ${strip}
+      </div>`;
+    }
+
+    // ── Render full result ──
+    function renderResult(result, container) {
+      if (result.error) {
+        container.innerHTML = `<div class="error-msg">⚠ ${result.error}</div>`;
+        return;
+      }
+      const avgScore = result.verses.reduce((s, v) => s + v.score, 0) / (result.verses.length || 1);
+      const sc = scoreClass(avgScore);
+      const versesHtml = result.verses.map((v, i) => renderVerse(v, i)).join('');
+      container.innerHTML = `
+    <div class="result-header">
+      <div class="meter-badge">
+        <span class="label">البحر المكتشف</span>
+        ${result.meter}
+      </div>
+      <div class="score-ring">
+        <div style="font-size:0.78rem;color:#7a6540;text-align:left">متوسط<br>الدقة</div>
+        <div class="score-circle ${sc}">${pct(avgScore)}</div>
+      </div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:rgba(61,90,71,0.5)"></span>صحيح</span>
+      <span class="legend-item"><span class="legend-dot" style="background:rgba(184,136,42,0.5)"></span>مكسور (زحاف/علة)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:rgba(139,58,26,0.4)"></span>مفقود</span>
+    </div>
+    <div class="ornament">✦ ✦ ✦</div>
+    ${versesHtml}
+  `;
+    }
+
+    // ── Single analyze ──
+    window.analyzeSingle = async function () {
+      const sadr = document.getElementById('single-sadr').value.trim();
+      const ajuz = document.getElementById('single-ajuz').value.trim();
+      if (!sadr) { alert('أدخل الصدر على الأقل'); return; }
+      setLoading('single-btn', true);
+      const meter = document.getElementById('single-meter').value || null;
+      await new Promise(r => setTimeout(r, 10));
+      try {
+        const result = processor.processPoem([[sadr, ajuz]], meter);
+        renderResult(result, document.getElementById('single-result'));
+      } catch (e) {
+        document.getElementById('single-result').innerHTML = `<div class="error-msg">⚠ خطأ: ${e.message}</div>`;
+        console.error(e);
+      }
+      setLoading('single-btn', false);
+    };
+
+    // ── Poem analyze ──
+    window.analyzePoem = async function () {
+      const input = document.getElementById('poem-input').value.trim();
+      if (!input) { alert('أدخل القصيدة أولاً'); return; }
+
+      const lines = input.split('\n').map(l => l.trim()).filter(l => l !== '');
+      const verses = [];
+      for (let i = 0; i < lines.length; i += 2) {
+        const sadr = lines[i];
+        const ajuz = lines[i + 1] || ''; // Use empty string if odd lines
+        verses.push([sadr, ajuz]);
+      }
+
+      setLoading('poem-btn', true);
+      const meter = document.getElementById('poem-meter').value || null;
+      await new Promise(r => setTimeout(r, 10));
+      try {
+        const result = processor.processPoem(verses, meter);
+        renderResult(result, document.getElementById('poem-result'));
+      } catch (e) {
+        document.getElementById('poem-result').innerHTML = `<div class="error-msg">⚠ خطأ: ${e.message}</div>`;
+        console.error(e);
+      }
+      setLoading('poem-btn', false);
+    };
+
+    // Enter key shortcut
+    document.getElementById('single-sadr').addEventListener('keydown', e => { if (e.key === 'Enter') analyzeSingle(); });
+    document.getElementById('single-ajuz').addEventListener('keydown', e => { if (e.key === 'Enter') analyzeSingle(); });
+
+    // Theme handling
+    window.toggleTheme = function () {
+      const html = document.documentElement;
+      const htmlNext = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', htmlNext);
+      localStorage.setItem('pyarud-theme', htmlNext);
+    };
+    const savedTheme = localStorage.getItem('pyarud-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  </script>
+</body>
+
+</html>
