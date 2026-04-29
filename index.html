@@ -711,6 +711,148 @@
       height: 10px;
       border-radius: 2px;
     }
+
+    /* Report button */
+    .report-btn {
+      background: none;
+      border: none;
+      color: var(--gold);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      opacity: 0.6;
+      transition: all 0.2s;
+    }
+
+    .report-btn:hover {
+      opacity: 1;
+      background: rgba(184, 136, 42, 0.15);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 10px 40px var(--shadow);
+    }
+
+    .modal-title {
+      font-family: 'Amiri', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--rust);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-title::before {
+      content: '⚠';
+    }
+
+    .modal-verse {
+      background: var(--input-bg);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-family: 'Amiri', serif;
+      font-size: 0.95rem;
+      color: var(--ink);
+      margin-bottom: 1rem;
+      direction: rtl;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .modal-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--input-bg);
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      resize: vertical;
+      direction: rtl;
+      outline: none;
+      margin-bottom: 1rem;
+    }
+
+    .modal-textarea:focus {
+      border-color: var(--gold2);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+    }
+
+    .modal-send {
+      padding: 0.6rem 1.5rem;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-send:hover {
+      background: #d4a43a;
+    }
+
+    .modal-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal-cancel {
+      padding: 0.6rem 1.2rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+      color: var(--gold);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-cancel:hover {
+      background: rgba(184, 136, 42, 0.08);
+    }
+
+    .modal-success {
+      color: var(--sage);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 0.5rem;
+    }
   </style>
 </head>
 
@@ -781,6 +923,20 @@
       <div id="poem-result" style="margin-top:1.5rem"></div>
     </div>
 
+  </div>
+
+  <!-- Modal for bug report -->
+  <div id="report-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title">الإبلاغ عن خطأ في تحليل البيت</div>
+      <div id="modal-verse" class="modal-verse"></div>
+      <textarea id="report-desc" class="modal-textarea" placeholder="صف المشكلة (اختياري)..."></textarea>
+      <div id="modal-message"></div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeReportDialog()">إلغاء</button>
+        <button class="modal-send" id="modal-send-btn" onclick="submitBugReport()">إرسال</button>
+      </div>
+    </div>
   </div>
 
   <!-- ─── All JS inline (imports from same folder) ─────────────────── -->
@@ -1658,8 +1814,8 @@
         const tip = `${footName}${zihafName} | ${cl === 'ok' ? 'صحيح' : cl === 'broken' ? 'مكسور' : cl === 'missing' ? 'مفقود' : 'زيادة'} | متوقع: ${exp}`;
 
         return `<span class="foot-chip ${cl}" title="${tip}">
-          <span style="display:block; direction:ltr">${seg.split("").reverse().join("")}</span>
-          <span style="font-size:0.72rem; letter-spacing:0.08em; opacity:0.8; margin-top:2px; font-family:monospace; direction:ltr; display:block">${exp.split("").reverse().join("")}</span>
+          <span style="display:block; direction:ltr">${seg.split('').reverse().join('')}</span>
+          <span style="font-size:0.72rem; letter-spacing:0.08em; opacity:0.8; margin-top:2px; font-family:monospace; direction:ltr; display:block">${exp.split('').reverse().join('')}</span>
           <span style="font-size:0.65rem; opacity:0.9; margin-top:3px">${footName}</span>
         </span>`;
       }).join('');
@@ -1705,10 +1861,12 @@
         zihafNotice = `<div class="zihaf-notice">⚠️ تم دخول زحاف أو علة في هذا البيت</div>`;
       }
 
+      const verseData = JSON.stringify(v).replace(/'/g, "&#39;");
       return `<div class="verse-block">
         <div class="verse-header">
           <span class="verse-num">البيت ${idx + 1}</span>
           <span class="score-circle ${sc}" style="width:38px;height:38px;font-size:0.72rem;border-width:2px">${pct(v.score)}</span>
+          <button class="report-btn" onclick='openReportDialog(${verseData})' title="الإبلاغ عن خطأ">⚑ إبلاغ</button>
         </div>
         ${sadrFeet}
         ${ajuzFeet}
@@ -1806,6 +1964,67 @@
     };
     const savedTheme = localStorage.getItem('pyarud-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // Bug report functionality
+    const SUPABASE_URL = 'https://szqnkwwtwtilsuzcyuau.supabase.co/rest/v1/bug_reports';
+    const SUPABASE_KEY = 'sb_publishable_BWGJo_eL6I_qa2pwmK6bow_wa36SNLe';
+    let currentReportVerse = null;
+
+    window.openReportDialog = function(verseData) {
+      currentReportVerse = verseData;
+      const verseText = verseData.sadr_text + (verseData.ajuz_text ? ' ||| ' + verseData.ajuz_text : '');
+      document.getElementById('modal-verse').textContent = verseText;
+      document.getElementById('report-desc').value = '';
+      document.getElementById('modal-message').innerHTML = '';
+      document.getElementById('modal-send-btn').disabled = false;
+      document.getElementById('report-modal').classList.add('show');
+    };
+
+    window.closeReportDialog = function() {
+      document.getElementById('report-modal').classList.remove('show');
+      currentReportVerse = null;
+    };
+
+    window.submitBugReport = async function() {
+      if (!currentReportVerse) return;
+      
+      const desc = document.getElementById('report-desc').value.trim();
+      const sendBtn = document.getElementById('modal-send-btn');
+      
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'جاري...';
+      
+      const bayet = currentReportVerse.sadr_text + (currentReportVerse.ajuz_text ? ' ||| ' + currentReportVerse.ajuz_text : '');
+      
+      try {
+        const response = await fetch(SUPABASE_URL, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            bayet: bayet,
+            desc: desc || null
+          })
+        });
+        
+        if (response.ok) {
+          document.getElementById('modal-message').innerHTML = '<div class="modal-success">✅ شكرا! لقد تم إرسال البلاغ بنجاح</div>';
+          setTimeout(() => closeReportDialog(), 1500);
+        } else {
+          throw new Error('Failed to submit');
+        }
+      } catch (e) {
+        document.getElementById('modal-message').innerHTML = '<div class="error-msg">⚠️ حدث خطأ في الإرسال</div>';
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'إرسال';
+      }
+    };
+
+    document.getElementById('report-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeReportDialog();
+    });
   </script>
 </body>
 
